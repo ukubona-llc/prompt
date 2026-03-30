@@ -1,0 +1,259 @@
+
+<style>
+:root{--gold:#c8a850;--ink:var(--color-text-primary);--mut:var(--color-text-secondary);--surf:var(--color-background-secondary);--surf2:var(--color-background-tertiary);--brd:var(--color-border-tertiary)}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font-sans);color:var(--ink)}
+.wrap{padding:16px 0;max-width:680px}
+.hd{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
+.section{background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:16px 18px;margin-bottom:12px}
+.pentad-row{display:flex;gap:0;margin-bottom:4px}
+.P{display:flex;flex-direction:column;align-items:center;flex:1;padding:10px 4px;border-right:1px solid var(--brd);cursor:pointer;border-radius:0;transition:background .15s}
+.P:first-child{border-radius:8px 0 0 8px}.P:last-child{border-right:none;border-radius:0 8px 8px 0}
+.P:hover{background:var(--surf2)}
+.P.active{background:var(--surf2)}
+.psym{font-family:var(--font-serif);font-style:italic;font-size:22px;margin-bottom:2px}
+.plabel{font-size:10px;font-weight:500;color:var(--mut)}
+.pdesc{padding:10px 14px;background:var(--surf2);border-radius:0 0 8px 8px;font-size:13px;line-height:1.7;color:var(--ink);border:1px solid var(--brd);border-top:none;margin-bottom:8px;display:none}
+.pdesc.show{display:block}
+.block{margin-bottom:8px}
+.blabel{font-size:11px;font-weight:500;color:var(--mut);margin-bottom:3px;letter-spacing:.06em}
+.pill{display:inline-block;font-family:var(--font-mono);font-size:10px;padding:2px 8px;border-radius:12px;border:1px solid var(--brd);color:var(--mut);margin:2px 3px 2px 0;cursor:pointer;transition:all .13s}
+.pill:hover{border-color:var(--gold);color:var(--gold)}
+.code{background:var(--surf2);border:1px solid var(--brd);border-radius:7px;padding:10px 13px;font-family:var(--font-mono);font-size:11px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-all;margin-top:4px;position:relative}
+.copy-btn{position:absolute;top:8px;right:10px;background:none;border:1px solid var(--brd);color:var(--mut);font-family:var(--font-mono);font-size:10px;padding:2px 8px;border-radius:4px;cursor:pointer;transition:all .13s}
+.copy-btn:hover{border-color:var(--gold);color:var(--gold)}
+.accent{color:var(--gold)}
+.tabs{display:flex;gap:0;margin-bottom:0;border-bottom:1px solid var(--brd)}
+.tab{padding:8px 16px;font-size:12px;cursor:pointer;color:var(--mut);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .13s;background:none;border-left:none;border-top:none;border-right:none}
+.tab.on{color:var(--ink);border-bottom-color:var(--gold)}
+.tabpanel{padding:14px 0 0;display:none}.tabpanel.on{display:block}
+.row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--brd);font-size:12px}
+.row:last-child{border:none}
+.rowlabel{color:var(--mut)}
+.tag{font-family:var(--font-mono);font-size:10px;padding:1px 6px;border-radius:4px;border:1px solid;margin-left:4px}
+.red-tag{border-color:rgba(200,50,50,.3);color:#c84040;background:rgba(200,50,50,.07)}
+.grn-tag{border-color:rgba(50,160,80,.3);color:#28a060;background:rgba(50,160,80,.07)}
+.blu-tag{border-color:rgba(56,120,200,.3);color:#3878d0;background:rgba(56,120,200,.07)}
+</style>
+<div class="wrap">
+
+<div class="section" style="border-left:3px solid var(--gold)">
+  <div class="hd">Ukubona LLC · pentadic digital twin OS</div>
+  <div style="font-family:var(--font-serif);font-style:italic;font-size:18px;margin-bottom:4px">T → M → V → E → S &nbsp;↺&nbsp; U(s)</div>
+  <div style="font-size:12px;color:var(--mut)">The five-layer loop that governs every twin — click each node to see what it owns.</div>
+  <div style="margin-top:10px">
+    <div class="pentad-row" id="prow">
+      <div class="P active" onclick="showP(0)" data-i="0"><span class="psym accent">T</span><span class="plabel">Tensor</span></div>
+      <div class="P" onclick="showP(1)" data-i="1"><span class="psym" style="color:#d89030">M</span><span class="plabel">Matrix</span></div>
+      <div class="P" onclick="showP(2)" data-i="2"><span class="psym" style="color:#d94040">V</span><span class="plabel">Vector</span></div>
+      <div class="P" onclick="showP(3)" data-i="3"><span class="psym" style="color:#8060c8">E</span><span class="plabel">Eigen</span></div>
+      <div class="P" onclick="showP(4)" data-i="4"><span class="psym" style="color:#28a86a">S</span><span class="plabel">Scalar</span></div>
+    </div>
+    <div id="pdesc" class="pdesc show"></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="tabs">
+    <button class="tab on" onclick="showTab('prompt')">Prompt template</button>
+    <button class="tab" onclick="showTab('arch')">Architecture DNA</button>
+    <button class="tab" onclick="showTab('adapt')">Adapt to domain</button>
+  </div>
+
+  <div id="tab-prompt" class="tabpanel on">
+    <div class="hd" style="margin-top:4px">Copy this to any LLM (fits in ~250 lines)</div>
+    <div class="code" id="prompt-block">You are building a <span class="accent">[PROJECT_NAME]</span> Digital Twin OS for <span class="accent">[CLIENT]</span>.
+
+PENTADIC FRAMEWORK — every feature maps to one of five layers:
+  T  Tensor    — full reality. All vars, all sites, all time.
+  M  Matrix    — compressed attention. What we actually watch.
+  V  Vector    — gradient. Where things are drifting / worsening.
+  E  Eigenmode — identity. Core patterns / DNA to preserve.
+  S  Scalar    — KPI. One number with all weights baked in.
+  ↺  U(s)      — the control action closing the loop.
+
+DOMAIN
+  Project : <span class="accent">[PROJECT_NAME]</span>
+  Location: <span class="accent">[LOCATION]</span>
+  Sites   : <span class="accent">[N]</span> sites across <span class="accent">[COUNTRIES/REGIONS]</span>
+  Variables: <span class="accent">[N_VARS]</span> across <span class="accent">[N_DEPTS]</span> departments, <span class="accent">[N_PHASES]</span> phases
+  Key risk: <span class="accent">[PRIMARY_RISK — e.g. material leakage / cost overrun / mortality]</span>
+
+STATE VECTOR (per site/node, 5 dims)
+  x[0] <span class="accent">[completion / progress / health]</span>    ∈ [0,1]
+  x[1] <span class="accent">[material / resource / data integrity]</span> ∈ [0,1]
+  x[2] <span class="accent">[labor / capacity / staff health]</span>      ∈ [0,1]
+  x[3] <span class="accent">[financial / supply / funding]</span>         ∈ [0,1]
+  x[4] <span class="accent">[risk exposure / volatility / hazard]</span>  ∈ [0,1]
+
+TWIN EQUATION
+  x_{t+1} = f(x_t, u_t, G_t)
+  where G_t = network coupling across sites (same-country: w=0.15, cross: w=0.03)
+  u_t = control input from dashboard sliders / CSV ingest
+
+SCALAR KPI
+  S = clip( w·x + b, 0, 1 )
+  Default weights: w = [0.30, 0.20, 0.18, 0.20, -0.12], b = 0.12
+  At-risk threshold: S < 0.50
+
+LOSS FUNCTION L(θ)
+  L = leakage_rate × <span class="accent">[unit_price_field]</span>
+  By category: procured − consumed, scaled by priority weights θ
+  Eigenmode breach: if λ_1 > Σ λ_{i>1} → SYSTEMIC flag
+
+BACKEND (FastAPI + Python)
+  /auth/login        POST  password → JWT (8h TTL)
+  /twin/portfolio    GET   all site states x_t
+  /twin/trajectory/{id} GET  full history []x_t
+  /twin/step         POST  u_t → x_{t+1} for all sites
+  /twin/ingest       POST  CSV → maps leakage → u_t → steps twin
+  /analytics/summary GET   total loss, by category, by phase
+  /analytics/eigen   GET   eigendecomposition of loss covariance
+  /analytics/timeline GET  weekly loss series
+
+FRONTEND (React, single file ≤ 300 lines)
+  Route /        → Dashboard (5-tab pentadic nav: T M V E S)
+  Route /geo     → GeoMap (Leaflet, site markers, truck animation)
+  Auth via JWT stored in sessionStorage
+  Theme: dark/light toggle
+  Fonts: Cormorant Garamond (headings/numbers) + DM Sans (body) + DM Mono (code/labels)
+  Color system:
+    gold   #c8a850  — primary accent, KPI numbers
+    red    #d94040  — high leakage / at-risk
+    amber  #d89030  — medium risk / warning
+    teal   #20a890  — twin engine / good state
+    purple #8060c8  — eigenmode / identity
+    blue   #3878d0  — logistics / info
+    green  #28a86a  — healthy / on-target
+
+DASHBOARD TABS
+  T  Full tensor — all vars, all sites table, weekly timeline
+  M  Matrix     — leakage by category, bar chart, heatmap
+  V  Vector     — eigenvector bar chart, dominant driver, drift
+  E  Eigenmode  — leakage-flagged tasks, identity preservation
+  S  Scalar     — composite gauge [0–100], twin KPI baked in
+
+GEO MAP LAYERS
+  Completion · Leakage · Twin KPI · Logistics (truck anim) · Composite
+  Sidebar: scenario selector, weight sliders θ, event log, trajectory sparkline
+
+DATA FORMAT (CSV ingest)
+  week, site_id, category, procured, received, consumed, unit_price
+
+SITES JSON
+  { id, name, lat, lon, pct, city, weather_risk, soil_class, supply_delay, labor_index }
+
+RENDER.YAML (Render.com deploy)
+  Write via Python, not bash heredoc — avoids $PORT interpolation bug.
+  Backend: gunicorn main:app -w 2 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+  Frontend: npm install && npm run build (Node 18, react-scripts --openssl-legacy-provider)
+  Env vars: PROJECT_NAME, LOCATION, DASHBOARD_PASSWORD, JWT_SECRET
+
+BRANDING
+  Logo: spinning Ukubona mark (CSS animation: spin360 60s linear infinite)
+  Footer: "T → M → V → E → S  ↺  U(s) · Powered by Ukubona LLC"
+  Login gate: Cormorant italic heading, DM Mono labels, JWT auth, theme toggle
+
+OUTPUT
+  Generate: backend/main.py + backend/engine/twin.py + frontend/src/App.js
+           + frontend/src/Dashboard.js + frontend/src/components/GeoMap.js
+           + frontend/src/auth.js + render.yaml
+  All JS/JSX heredocs must use single-quote delimiters to prevent bash expansion.
+  All secrets from env vars only — never hardcoded.
+<button class="copy-btn" onclick="copyBlock('prompt-block',this)">Copy</button></div>
+  </div>
+
+  <div id="tab-arch" class="tabpanel">
+    <div class="hd" style="margin-top:4px">What each layer owns</div>
+    <div class="row"><span class="rowlabel">State dim</span><span>5 per site (completion, material, labor, financial, risk)</span></div>
+    <div class="row"><span class="rowlabel">Twin step</span><span style="font-family:var(--font-mono);font-size:11px">x_{t+1} = f(x_t, u_t, G_t)</span></div>
+    <div class="row"><span class="rowlabel">Coupling</span><span>same-country 0.15 · cross-country 0.03</span></div>
+    <div class="row"><span class="rowlabel">KPI scalar</span><span style="font-family:var(--font-mono);font-size:11px">w·x + b, w=[.30,.20,.18,.20,-.12]</span></div>
+    <div class="row"><span class="rowlabel">Loss L(θ)</span><span style="font-family:var(--font-mono);font-size:11px">(procured − consumed) × unit_price</span></div>
+    <div class="row"><span class="rowlabel">Systemic flag</span><span style="font-family:var(--font-mono);font-size:11px">λ₁ > Σ λᵢ₋₁</span></div>
+    <div class="row"><span class="rowlabel">Auth</span><span>HS256 JWT, 8h TTL, env-var secret</span></div>
+    <div class="row"><span class="rowlabel">Deploy</span><span>Render.com — Python writer for render.yaml</span></div>
+    <div class="row"><span class="rowlabel">Frontend budget</span><span>≤300 lines per file, React 18 + Recharts + Leaflet</span></div>
+    <div class="row"><span class="rowlabel">Branding</span><span>Cormorant + DM Sans + DM Mono · spin360 logo</span></div>
+    <div style="margin-top:12px">
+      <div class="hd">Critical bugs fixed in v07</div>
+      <div class="row"><span class="rowlabel">render.yaml</span><span><span class="tag red-tag">bug</span> bash heredoc expands $PORT → broken startCommand<span class="tag grn-tag">fix: Python writer</span></span></div>
+      <div class="row"><span class="rowlabel">JSX heredocs</span><span><span class="tag red-tag">bug</span> ${"{}"} in JS expands in bash<span class="tag grn-tag">fix: single-quote delimiter</span></span></div>
+      <div class="row"><span class="rowlabel">Secrets</span><span><span class="tag red-tag">bug</span> hardcoded in heredoc<span class="tag grn-tag">fix: env vars only</span></span></div>
+      <div class="row"><span class="rowlabel">Node version</span><span><span class="tag blu-tag">pin: 18.x</span> + openssl-legacy-provider build flag</span></div>
+    </div>
+  </div>
+
+  <div id="tab-adapt" class="tabpanel">
+    <div class="hd" style="margin-top:4px">Swap these to change domain</div>
+    <div style="font-size:12px;color:var(--mut);margin-bottom:10px">The pentad T→M→V→E→S is universal. Only the domain vocabulary changes.</div>
+    <div class="block">
+      <div class="blabel">Construction (default)</div>
+      <span class="pill">sites = construction sites</span><span class="pill">x[0] = % complete</span><span class="pill">x[1] = material integrity</span><span class="pill">L = procured−consumed</span><span class="pill">categories = Cement, Steel…</span>
+    </div>
+    <div class="block">
+      <div class="blabel">Healthcare / hospital network</div>
+      <span class="pill">sites = hospitals</span><span class="pill">x[0] = bed occupancy</span><span class="pill">x[1] = supply chain fill-rate</span><span class="pill">x[2] = staff capacity</span><span class="pill">x[4] = mortality risk</span><span class="pill">L = supply leakage or readmission</span>
+    </div>
+    <div class="block">
+      <div class="blabel">Supply chain / logistics</div>
+      <span class="pill">sites = warehouses/hubs</span><span class="pill">x[0] = order fulfillment</span><span class="pill">x[1] = inventory health</span><span class="pill">x[3] = cashflow</span><span class="pill">L = spoilage + delay cost</span>
+    </div>
+    <div class="block">
+      <div class="blabel">Public health / epidemic twin</div>
+      <span class="pill">sites = districts</span><span class="pill">x[0] = vaccination coverage</span><span class="pill">x[2] = health worker density</span><span class="pill">x[4] = transmission risk R_eff</span><span class="pill">coupling = population flow</span>
+    </div>
+    <div class="block">
+      <div class="blabel">Education / school network</div>
+      <span class="pill">sites = schools</span><span class="pill">x[0] = enrollment rate</span><span class="pill">x[2] = teacher attendance</span><span class="pill">x[3] = funding stability</span><span class="pill">L = dropout + absenteeism cost</span>
+    </div>
+    <div class="block">
+      <div class="blabel">Civilization stack (Ukubona full model)</div>
+      <span class="pill">Layer I = Person</span><span class="pill">Layer II = Kin/Network</span><span class="pill">Layer III = Systems</span><span class="pill">Layer IV = Regulators</span><span class="pill">Layer V = Civilization</span><span class="pill">Layer VI = Portal</span>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--mut);line-height:1.7">
+      The six civilization layers map onto the pentad: <span style="color:var(--ink)">T</span> covers Layers I–V (the full observable reality). <span style="color:var(--ink)">M</span> selects which layer's signals to amplify. <span style="color:var(--ink)">V</span> tracks drift across layers. <span style="color:var(--ink)">E</span> preserves the identity of each layer's core function. <span style="color:var(--ink)">S</span> collapses all layers to a single decision number.
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const PENTAD=[
+  {sym:'T',col:'#c8a850',title:'Tensor — Reality',
+   desc:'The full operational landscape. Every variable, every site, every time-step. This is the raw data tensor: shape [sites × categories × weeks × phases]. Nothing is compressed here — T holds everything. In construction: all 120 procurement variables across 20 sites over 16 weeks. In healthcare: all patient flows, bed counts, drug stocks across every facility.'},
+  {sym:'M',col:'#d89030',title:'Matrix — Attention',
+   desc:'What we compress and monitor. M is the projection of T onto the things that matter right now. This is the dashboard\'s job — filtering the tensor down to actionable signals. In construction: the category leakage heatmap. In healthcare: the bed-pressure and staff-shortage indicators. M is always smaller than T; that compression is the editorial judgment of the twin.'},
+  {sym:'V',col:'#d94040',title:'Vector — Gradient',
+   desc:'Direction and velocity of operational drift. V answers: where is this getting worse, and how fast? In math: the dominant eigenvector of the loss covariance matrix. In practice: the bar chart showing which category (Cement, Steel…) is pulling the portfolio off-course. V is the early warning signal — it moves before the scalar KPI falls below threshold.'},
+  {sym:'E',col:'#8060c8',title:'Eigenmode — Identity',
+   desc:'The core DNA to preserve. E is the principal component of who you are — the latent structure that survives all perturbations. For Strata Stone: the 93 operational tasks encoded in the CEO\'s document; the leakage-prevention practices; the payment-through-mobile-money policy. E is what must not drift, even when V is screaming.'},
+  {sym:'S',col:'#28a86a',title:'Scalar — KPI',
+   desc:'One number. S = w·x + b, clipped to [0,1]. All five state dimensions, all category weights, the twin engine state, the eigenmode penalty — collapsed to a single decision threshold. Green above 0.70. Amber 0.50–0.70. Red below 0.50. The CEO looks at S first. Everything else in the twin exists to explain why S is what it is.'}
+];
+let curP=0;
+function showP(i){
+  document.querySelectorAll('.P').forEach((el,j)=>el.classList.toggle('active',j===i));
+  const p=PENTAD[i];
+  const d=document.getElementById('pdesc');
+  d.classList.add('show');
+  d.innerHTML=`<b style="color:${p.col}">${p.sym} — ${p.title.split('—')[1].trim()}</b><br>${p.desc}`;
+  curP=i;
+}
+showP(0);
+
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.getAttribute('onclick').includes("'"+name+"'")));
+  document.querySelectorAll('.tabpanel').forEach(t=>t.classList.toggle('on',t.id==='tab-'+name));
+}
+
+function copyBlock(id,btn){
+  const el=document.getElementById(id);
+  const text=el.innerText.replace(/^Copy$/m,'').trim();
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';
+    setTimeout(()=>btn.textContent='Copy',2000);
+  });
+}
+</script>
